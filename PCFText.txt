@@ -1,0 +1,166 @@
+Ephemeral infrastructure
+
+---virtual machines and containers are temporary
+
+Immutable infrastructure
+
+---system and application updates are not done on existing apps and systems
+but new updated instances are created
+
+12 factor apps
+---------------
+1)processes
+2)concurrency
+3)disposability
+4)logs
+
+Processes are stateless so don't store it in app or sys instances.
+we will persist the state to some backing services
+
+concurrency--> via the process model.workers can read from a message queue or web apps which might serve our customers
+
+disposability--> fast start up and graceful shutdown
+
+Logs--> treated as event streams. app don't need to manage logs. system will determine
+what happens to the logs
+
+
+Elastic runtime architecture
+---------------------------------------
+subsystems
+----> diego, loggregator, cloud controller api, routing
+
+
+Diego
+-----------
+schedular-> schedule tasks and long running processes(LRPs)
+
+task-> event which is guaranteed to run atleast once
+example-> staging an application
+
+Lrps-> an web app
+
+Diego container->app instances are run within a container which is immutable
+Diego cell-> container runs within a cell and there can be many containers depending on the
+no of app instances
+pcf has pool of cells
+
+Diego Garden--> is an interface which manages the containers
+Has many backends. example linux and windows
+Rep is a process that is running on a cell. and represents the cell in auctions
+Auction is held to bid on executing a task and lrp
+Executor is a subprocess of Rep.and provides what going on with the cell.
+Example does the cell has more memory to create one for container for an app instance
+
+Executor forwards logs to metron which forwards it to a loggregator
+Metron is present in the cell
+BBS-->Bulletin Board System API--> to access Diego DB for tasks and Lrp
+persists the information to the ectd db
+
+Brain-> holds the auction
+Auctioneer, converger --> subprocess
+
+
+Loggregator
+--------------------
+metron passes logging info to loggregator sub system
+
+sub sys has different components
+
+Doppler--> ability to create app syslog drain-> third party 
+Traffic controller->> handling requests--> cf logs
+		  -->> also exposes websocket endpoint called firehose
+firehose-> app logs, container metric elr component metrics
+	--> don't include Er component logs
+metron --doppler --- traffic controller --- datadog nozzle
+
+nozzles
+consumes firehose output
+
+
+Cloud controller 
+
+exposes api for using and managing Elastic runtime
+
+cloud controller persits its info in Cloud Controller Database
+
+Blob store --> when we upload it persists the app artifact id to the blobstore
+
+	droplet gets saved to blobstore
+
+
+CC --> CC-bridge--> BBS
+cc-bridge--> app specific domain to generic diego language of tasks and LRPS
+
+Routing
+------------------------------------
+it maps the req to appropriate app instances running on given cells
+
+maps cf push to CC
+
+FLows
+---------------------
+Staging
+
+cc --> cc-bridge--> BBS(bulletin board sys)-->Brain(auctioneer)->> cells--reps(executor)->>container
+
+Generic Domain Tasks and LRPs
+
+
+
+Buildpacks
+---------------------------------
+responsible for building the droplet and is immutable (provide the runtime environment)
+
+
+High Availability
+----------------------------
+instances are distributed to availability zones
+
+Bosh managed process
+------------------
+monitoring of elastic runtime processes and automatically restarted
+
+Monit and Bosh agent
+CC Vm contains the cc processes as well as monit and bosh agents
+
+Monit restarts the CC process and pass rthe info to the Bosh agent which will report it to Bosh
+
+Bosh is a vm is managing the entire distributed system
+
+bosh agent --> message bus --> health monitor informs via mails and other stuff
+
+if router vm or cc vm fails the health monitor resurrector plugin will understand there is a missing vm
+and ask the Bosh director to provision one.
+
+Self healing app instances
+------------------------------------------
+rep reports states of the given to bbs and the brain will look at it and compares with the expected state and then decide
+to hold an auction for provision
+
+
+
+Commands for Logs
+-------------------------------------
+cf logs app-name
+cf start app-name
+
+cf logs app-name | grep "API\|CELL" --> to remove unnecessary logs 
+
+to dedicate more memory-->> cf scale app-name -m 1G
+
+to display health----> cf app app-name
+
+to scale out as in increase the number of instances--> horizontal scaling --> cf scale app-name -i 3
+**no downtime associated with scaling horizontally
+
+cf events app-name--> to provide the data regarding various deployment events
+
+cf app app-name --> gives the data of the application that is running. like instances, memory, state etc
+
+
+
+
+
+
+
