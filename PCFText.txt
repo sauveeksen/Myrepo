@@ -159,7 +159,40 @@ cf events app-name--> to provide the data regarding various deployment events
 cf app app-name --> gives the data of the application that is running. like instances, memory, state etc
 
 
+Fundamental Changes: Distributed computing ephemeral architecture, disposability
 
+
+Garden is an interface with many implementations-->true (windows,linux)
+
+Which component of elr exposes an api to manage applications--> CC
+
+What are the 4 levels of high availability that keep your application running
+--->availability zones and racks, bosh managed processes, failed vms(resurrector), self healing application
+	(brain)
+
+Scaling up---> increase memory--> throw old container and provision new container
+Scaling out--->increase instances--> no downtime as compared to scaling up
+
+How do you recover failed instances---> logs, best place to go is cf events
+
+
+
+Config and Backing Services
+-------------------------------------------------------------------
+
+Store config in the OS environment variables
+
+Backing services are attached resources.
+
+cf logs app-name --recent ----> command for debugging recent
+
+cf create-service p-mysql 100mb-dev attendee-mysql --> to provision a backing service
+
+cf bind-service attendee-service attendee-mysql
+
+cf restage---> for environment variable changes takes effect
+
+cf restart app-name
 
 
 
