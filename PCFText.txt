@@ -174,7 +174,107 @@ cf env service-name
 
 User Provide Service Instance
 ---------------------------------------------------
+Services outside of the marketplace of PCF
 
+cf create-user-provided-service service-instance-name -p uri
+
+Manage service instance lifecycle 
+--> creating, binding, unbinding, deleting
+
+
+A service instance is a reserved resource-> example database on shared or dedicated system or vm
+
+VCAP_SERVICES helps in exposing configuration stuff to our application which is stored in the environment
+through the VCAP_SERVICES variable
+
+managed service - present in marketplace
+user provided service instance --> not present in marketplace. provisioned out side the pcf
+
+Manifest
+------------------------------------------------------------
+it helps in specifying everything in file rather than on the command line
+
+Manifest is not uploaded with the application. It is parsed by the cli
+
+Cli sends multiple rest requests to the cloud controller
+
+For services to bind to the application it needs to be in the manifest file. else it will
+not be bound to the application.
+
+
+cf set env --> to set an environment variable
+
+
+
+
+Application Security Group Module
+------------------------------------------------------------------------------
+app sec group are firewalls that outbound traffic for apps
+Example -> from app to db
+
+Allows us to decide which security policy to be implemented during various lifecycle of 
+the app deployment
+
+Example--> during staging we can not allow the app to access our db but allow it to download 
+various dependencies
+
+space security groups
+-----------------------------
+applicable to app running within a given space which can be combined with running security
+group for outbound traffic from the app
+
+security group rules file
+---------------------------------------
+json based
+1) protocol
+2) destination
+3) ports
+
+cf t --> user profile
+
+cf security-groups --> to see security groups that are running and are bound to my dev space
+
+cf security-group security-group-name --> info about the particular security group
+
+
+staging and running security groups are system wide. They apply everywhere.
+
+Single security group definition can be applied to different spaces.
+
+cf staging-security-groups, cf running-security-groups ----> to get info about security groups 
+attached to various lifecycles.
+
+cf unbind-running-security-group security-group-name ---> to unbind the security group attached to 
+															application ---> can only be done 
+																			by the admin
+																			
+****changes takes place when the existing running applications are restarted.
+
+cf create-security-group group-instance-name ./pathname
+
+to bind a specific security group 
+-----------------------------------------------
+cf bind-security-group group-instance-name	org-name space-name
+example:- cf bind-security-group rambo sauveek development
+
+***whitelist is used for implementing security groups																	
+
+relationship between running and space security groups
+--->union of both of them put together. if allowed anywhere, the application will be able to 
+take advantage of that
+
+Why security groups
+----------------------------
+protection against typically trusted resources like employees
+limit your exposure. force app to use appropriate application or api
+
+
+LOGS
+-------------------------------------------------------------
+
+
+
+															
 
 
 
