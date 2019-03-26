@@ -1,3 +1,4 @@
+cf push app-name -p ./path -m memoryM/G --random-route
 Ephemeral infrastructure
 
 ---virtual machines and containers are temporary
@@ -192,6 +193,19 @@ user provided service instance --> not present in marketplace. provisioned out s
 
 Manifest
 ------------------------------------------------------------
+By default if there is a manifest.yml file on the same path then cli(cf push) will automatically parse it...
+To avoid, remove the manifest
+file from the path
+
+
+
+To create a manifest file
+
+-------------------------------------------------------------
+
+cf create-app-manifest attendee-service -p ./manifest.yml
+
+
 it helps in specifying everything in file rather than on the command line
 
 Manifest is not uploaded with the application. It is parsed by the cli
@@ -271,11 +285,129 @@ limit your exposure. force app to use appropriate application or api
 
 LOGS
 -------------------------------------------------------------
+Doppler--> responsible for importing the logs onto the different log drains
+
+Traffic Controller-->api for the command cf logs app-name
+			also exposes a websocket endpoint named the firehose
+
+Firehose provides app logs, container metrics and ER component metrics
+		Doesn't include ER component logs
+
+Firehose gets consumed through nozzles which are used to implement different 
+visualizations to make us understand what is going on with our pcf environment
+
+Command for log drain service
+--------------------------------
+cf create-user-provided-service articulate-log-drain -l syslog://uri
+
+cf bind-service app-name service log-drain-service
+
+Recap
+--------------------------------
+cf restage and cf restart is not neccessary for log-drain-service to start working
+ 
+
+Blue Green Deployments
+
+-----------------------------------------------------------------------
+
+Zero downtime between upgrade or downgrade
 
 
 
-															
+Few things we need to take care before using blue green deployements
 
+1)If using serializing objects don't make destructive changes. Example don't remove fields, do have a serialVersionUID
+	
+
+Another example is if we don't want to have few fields anymore in our upgraded application then we don't delete the fields 
+but we will not reference it any more
+	
+
+serialVersionUID allows us to have multiple versions of the object persisted and have our application respond to that
+	
+
+
+Admin Processes
+
+----------------------
+
+One off process example migrating data--> what we need to do is to run the new version in the same environment as the old one
+
+
+Database
+
+-----------------------------------
+
+Make the changes idempotent-->example-> copy data to new fields but don't delete the data(column) 
+Repeat the pattern which can 
+only be done if it is idempotent
+
+
+
+Never make any destructive changes to the database-->never delete any column
+
+
+
+We need our upgraded application to be backwards compatible ---> we can do that by using default values or nullable fields.
+****If newly added fields are non-nullable then some default values has to be passed.
+
+
+
+Commands
+
+----------------------------------
+cf routes ----> to get all the routes within the space
+
+cf push app-name-v2 -p ./jar-name -m memoryM/G -n parent-hostname-temp --no-start
+****here -n means a subdomain
+
+cf bind-service app-name-v2 service-instance-name
+
+cf start app-name-v2
+
+To map v2 route to the production route 
+---------------------------------------------------
+cf map-route app-name-v2 app-name-route-domain.com -n hostname
+
+****example---> cf map-route articulate-v2 gmail.com -n sauveeksen
+		first argument is the domain name and the second is the sub domain name or 
+		the hostname.
+											
+How the route gets divided?? --> total traffic/no of instances bound to the route 
+
+To slowly move out the original app instance
+---------------------------------------------------- 
+scale down the original app-instances and scale up the v2 app-instances
+
+To totally phase out the original app
+-------------------------------------------------------
+cf unmap-route original-app-name domain -n hostname
+
+and then unmap the temp route from the new version
+
+cf unmap-route v2-app-name domain -n hostname-temp
+
+**Backwards compatibility and non destructive changes are a must for blue-green deployments**
+
+
+
+Application Autoscaler
+---------------------------------------------------------
+to get service info from a service
+
+Example -->cf m -s app-autoscaler
+
+there are 2 ways of managing autoscaling
+------------------------------------------
+1)CPU thresholds
+2)Schedule based--> example for business hours
+
+12Factor----> disposibility
+
+If we manually autoscale even though the autoscaler is bound to the application
+then it will automatically unbind itself from the application and the application
+will go back to manual scaling settings
 
 
 
