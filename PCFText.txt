@@ -191,6 +191,17 @@ through the VCAP_SERVICES variable
 managed service - present in marketplace
 user provided service instance --> not present in marketplace. provisioned out side the pcf
 
+****EXAMPLE****
+
+cf create-service cleardb spark attendee-mysql
+
+cf bind-service attendee-service attendee-mysql
+
+cf create-user-provided-service attendee-service -p uri
+uri--> articulate application uri
+
+cf bind-service articulat attendee-service
+
 Manifest
 ------------------------------------------------------------
 By default if there is a manifest.yml file on the same path then cli(cf push) will automatically parse it...
@@ -408,6 +419,92 @@ there are 2 ways of managing autoscaling
 If we manually autoscale even though the autoscaler is bound to the application
 then it will automatically unbind itself from the application and the application
 will go back to manual scaling settings
+
+Application Performance Monitor
+------------------------------------------------------------------------------
+example--> new relic & app dynamics
+
+we create a new user-provided-service and bind it to the articulate application
+In this case we need to restage because the droplet needs to be rebuilt so that the newrelic agent 
+can be included inside of the droplet and run with our application
+We should bind both the articulate application and attendee-service service to newrelic service
+instance as well
+
+*command to create a new relic service*
+---------------------------------------
+cf create-user-provided-service newrelic -p license_key
+
+then we to need to input the license_key provided by newrelic to us
+
+PCF Metrics
+---------------------------------------------------------
+what does spike in memory indicate when using pcf metrics
+--> might mean a resource leak in the code
+
+
+Buildpacks
+--------------------------------------------------------------------
+
+A droplet has the application, app server, libraries(application performance 
+monitoring libraries), runtime
+
+Buildpack API has three scripts 
+1) bin/detect ---> determines whether the buildpack can stage the application
+2) bin/compile ---> builds the droplet
+3) bin/release ---> provides information on how to run the application
+
+While pushing an application if only ****cf push**** is used then bin/detect is called 
+and it iterates over all the buildpacks until one of them returns exit code 0
+
+bin/detect is not called
+------------------------------
+Whereas if we specify the buildpack by using the command ****cf push -b buildpack-name****
+the detect script is not going to be called
+
+compile script
+---------------------------------
+provide any of the following if needed
+1)runtime ---> java vm, ruby interpreter
+2)app server  ---> tomcat
+3)support libraries ---> npm packages
+
+application performance monitor agents--> the buildpack will add it
+
+release script
+--------------------------------------
+this outputs a yaml document 
+
+commands
+---------------------------------------------
+cf buildpacks
+
+to use custom buildpacks
+-------------------------
+cf push articulate -p ./articulate-0.2.jar -b https://github.com/cloudfoundry/java-buildpack.git
+
+if we need our application to work in a specific version of the environment(for example for java)
+---------------------------------------------------------------------------------------------------
+cf set-env articulate JBP_CONFIG_OPEN_JDK_JRE "{jre:{version:1.8.0_45}}"
+
+we can do the above for Tomcat as well i.e., if we need a specific version of the tomcat server
+
+
+we can use pivotal network to update buildpacks periodically
+we can refresh the pcf environment for that as well
+we can also use custom buildpacks
+
+
+which script is responsible for building the droplet --> compile script
+how do buildpack helps in managing cve or security issues--> instead of patching systems
+	manually, simply upload the patch buildpacks and restage the applications
+will cf restart be sufficient or not--> no, because the droplet needs to be rebuilt
+
+because we set the config parameter to set the java version, it notifies that the environment
+variable is available to the staging process 
+
+What other items are easily customized with the java-buildpack-->tomcat version,jre implementations
+	
+
 
 
 
