@@ -505,6 +505,108 @@ variable is available to the staging process
 What other items are easily customized with the java-buildpack-->tomcat version,jre implementations
 	
 
+Service Brokers
+----------------------------------------------------------------------------
+Managed services must implement the Service Broker API
+
+Service Broker can live in PCF or outside
+
+Service Broker API--> restful api over http--> the application(example attendee-service) 
+			that implements it can live anywhere
+
+different endpoints to be implemented
+-------------------------------------------------------
+1)catalog mgmt--> plans offered by the service
+2) provision --> creating the service instance
+3) deprovision --> delete the provisioned service
+4) bind
+5) unbind
+
+Provision
+--------------------
+mysql service --> shared dbms, large vm with multiple dbms
+
+Binding---> provide unique credentials per binding --> 
+		multiple applications using the same service
+		instance, provide them each their unique credentials
+
+
+Lab
+-------------------------
+cf push mongo-service-broker -p ./cf-mongodb-service-broker.jar -m 1G --random-route
+
+cf set-env mongodb-service-broker SERVICE_ID mongodb-service-broker-ss
+
+cf set-env mongodb-service-broker SERVICE_NAME MongoDB-ss
+
+cf set-env mongodb-service-broker PLAN_ID mongo-plan-ss
+
+cf start mongodb-service-broker
+
+
+Space scoped service broker
+-------------------------------------
+allows a developer to built up a service without requiring admin priviledges for 
+deployment
+
+cf create-service-broker will throw an error because it needs the following as arguments
+service broker name
+username
+password
+url 
+
+
+--space-scoped flag if we want that to work in a targeted space
+
+
+LAB
+---------------------------
+cf create-service-broker mongodb-service-broker-ss pivotal keepitsimple https://mongodb-service-broker-sweet-alligator.cfapps.io --space-scoped
+
+cf service-brokers --> to get the list of brokers in one's space
+cf service-access--> to get the list of service brokers developer has access-->none
+
+cf m --> to check whether out broker is listed in the marketplace or not 
+
+
+for provisioning/de provisioning ---> we need to implement ServicInstanceService 
+			in Spring Cloud	throw ServiceBrokerException
+
+for binding/unbinding ---> implement ServiceInstanceBindingService
+		if binding exists throw ServiceInstanceBindingExistsException
+		
+		if doesn't exist create a database and return back to the cloud controller
+		the response with credentials which will be persisted in the CC_DB
+		and then exposed to the bound application via the VCAP_SERVICES
+		as well as save the binding in the binding repository i.e., MongoDB database
+
+To see can we use our service broker
+-----------------------------------------
+cf m
+
+
+Recap
+------------------
+where do service broker need to be deployed??
+--> anywhere the cloud controller can reach it via an https call
+
+why provide unique credentials for binding?
+--> best practice...unbinding doesn't affect other applications other than the application
+being unbounded.
+
+can a service broker support upgrade or a downgrade of a service??
+-->upgrade support is offered.... 
+
+the broker is supposed to respond to the cloud controller within how many seconds?
+-->60 seconds
+
+does provisioning have to done synchronously?
+--> No. It can be done asynchronously. we will have to implement another endpoint though
+
+do all services have to be bindable??
+--> No
+
+
 
 
 
