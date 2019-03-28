@@ -624,4 +624,17 @@ what are the benefits of continuous delivery?
 
 
 
+Routing Services
+-----------------------------------------------------------------
+purpose --> provide transformation or processing of requests after they reach an application
+
+1)authentication
+2) Rate limiting --> incase we don't want our api to be overrun by requests from users
+3) Logging --> to log all the requests coming in and to provide more verbose logging
+4) Caching --> cache responses instead of calling the downstream applications
+
+ 
+
+
+
 
