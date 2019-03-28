@@ -607,6 +607,21 @@ do all services have to be bindable??
 --> No
 
 
+Continuous Delivery
+------------------------------------------------------------------------------
+continuous delivery != continuous deployment
+
+continuous delivery --> app is ready to be deployed?
+
+Strategies
+--------------------
+Do implement continuous integration 
+Don't create environment specific packages
+Externalize environment specific config
+Don't assume existing processes are right
+
+
+
 Jenkins
 -------------------------------------------------------------------
 
