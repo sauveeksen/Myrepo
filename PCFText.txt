@@ -607,7 +607,20 @@ do all services have to be bindable??
 --> No
 
 
+Jenkins
+-------------------------------------------------------------------
 
+what are the continuous delivery strategies??
+1)continuous integration
+2)don't create application environment specific packages
+3)blue green deployement strategies
+
+does continuous delivery mean continuous deployment?
+--> no, continuous deployment means that every commit is directly pushed into production
+	where as continuous delivery means that every change can be deployed to
+	production at any time.
+what are the benefits of continuous delivery?
+--> reducing risks, or increasing feedbacks, providing reliable releases
 
 
 
