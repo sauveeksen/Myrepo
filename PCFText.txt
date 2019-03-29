@@ -275,7 +275,9 @@ cf unbind-running-security-group security-group-name ---> to unbind the security
 																			
 ****changes takes place when the existing running applications are restarted.
 
-cf create-security-group group-instance-name ./pathname
+cf create-security-group group-instance-name ./pathnametothefile
+
+the json file should contain the above 3 properties.
 
 to bind a specific security group 
 -----------------------------------------------
@@ -634,6 +636,106 @@ purpose --> provide transformation or processing of requests after they reach an
 4) Caching --> cache responses instead of calling the downstream applications
 
  
+Advanced Topics
+-----------------------------------------------------------------
+Tasks ---> directly relate to the admin processes --->a task runs once and then terminates
+		Example--> application staging
+				database migration
+				sending an email
+				running a batch job
+				processing images
+				upload data
+
+To run a task
+--------------------------------
+deploy the application containing the task process 
+using cf push and then run the following command
+
+cf run-task app-name command-to-launch-the-task
+
+to monitor a task's status
+--------------------------------- 
+cf tasks
+
+to terminate a task
+--------------------------------
+cf terminate task task-name
+
+Task execution history is retained for one month 
+
+
+
+File system as a service
+----------------------------------------------------------------
+application that rely on the file system would not be able to be ported to PCF
+
+FSAS helps by exposing a disk mount point that applications can write to
+	--> it is independent of the container and outlives the container which might be 
+		destroyed may be on restart
+
+requirements to use the service 
+----------------------------------------
+an existing nfs server should be available and running 
+then pcf admin must enable volume services from the Ops manager UI
+
+command
+----------------
+cf create-service nfs Existing nfs_service_instance -c '{"share":"ip address of the nfs server/export/myshare"}'
+export/myshare -----> path of the developers nfs server
+
+
+then 
+
+cf bind-service my-app nfs-service-instance -c '{"uid":"1000","gid":"1000","mount":"var/volume1"}'
+mount parameter is optional
+
+cf restage
+
+Container to Container Routing
+--------------------------------------------------
+if one application wants to communicate with another private application
+we can use c2c routing without the external network hop through the load balancer and goRouter
+
+But we need to do load balancing at client side --> can be done through Netflix Ribbon
+The application which will invoke the other private applications must know the address
+for each instance of the invoked application
+
+To use c2c routing
+-----------------------
+developer must install network policy plugin for the cf cli in order to manage the application's
+access control
+
+
+TCP routing
+-----------------------------------
+PCF exposes all applications over port 80 and 443
+
+To (TLS) communicate on the platform---> TCP routing is used
+
+Can be examined whether TCP has been enabled by the Admin
+---------------------------------------------------------
+cf domains
+
+applications using TCP routing must always be set to listen at port 8080
+
+to enable applications use TCP routing while pushing the following command needs to be used
+--------------------------------------------------------------------------------------------
+cf push my-app -d cf-tcpapps.io --random-route 
+
+OR
+
+map-route can be used to create new tcp routes to access an application
+
+cf map-route myapp cf-tcpapps.io --port 60010
+
+random-route can also be used
+
+the client must follow the same format as the application which is expecting to receive
+
+
+
+
+
 
 
 
