@@ -1,0 +1,37 @@
+Pivotal Mphasis Test questions
+
+1)to acces cf application using extranl resourses via open service broker
+
+2)what kind of things can be specified in a manifiest
+
+3)factor -12 methodlogu is used for whic cloud foundry service
+
+4)in Diego Deployment what is integarate with Gardon Run C---> container-to 
+
+5)what does cf target do
+
+6)what is the businees benifiets involved in pivotal cloud architecture
+
+7)what are the componets of Dieogo architecture
+
+8)which componets of dieogo architecture distibutes tasks and LRPS to Deigo cells
+
+9)Hypervisor is a Virtual machine monitor whuich manges resourses for
+
+10)in pcf, what action is performed by the availabilty zones when a failures occurs in one zones
+
+11)which of the following appication are not part of the security ghroups
+
+12)in PCFs , users are provide permission to controll the access thorugh
+
+13)which records does the colud controller maintain
+
+14)which category of storage device exists in pivotal colud
+
+15)what is the purpose of pws apps amnager?
+
+16)Logs types
+
+17)service of the pcf
+
+18)cli commond to add the build pack
